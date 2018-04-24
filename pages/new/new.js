@@ -2,7 +2,7 @@
 
 Page({
   data: {
-    accountDescp: "qianlihu@163.com",
+    accountDescp: "iloveyou@163.com",
     passwordId: "",
     passwordLength: 8,
     passwordStrength: [
@@ -12,20 +12,48 @@ Page({
       { name: "symbol", value: "!@#$%", checked: false }
     ],
     passwordCombination: ["lowerCase", "number"],
-    passwordResult: "123456"
+    passwordResult: "123456",
+    passwordResult2: "123456"
   },
   onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
     if (options.hasOwnProperty("id")) {
       var passwordId = options.id
       var account = wx.getStorageSync(passwordId)
+      var password2 = account.passwordResult
+      var nextCharacter = function (asciiValue, k) {
+        var s = asciiValue;
+        // 获取给定字母的后面第 k 个字母
+        if ((s >= 65 && s <= 90) || (s >= 97 && s <= 122)) {
+          if ((s + k >= 65 && s + k <= 90) || (s + k >= 97 && s + k <= 122)) {
+            return String.fromCharCode(s + k);
+          } else {
+            return String.fromCharCode(s + k - 26);
+          }
+        }
+        // 非字母字符不变化
+        else {
+          return String.fromCharCode(s);
+        }
+      }
+
+      var caesarCipher = function (stringValue, k) { // k 表示每个字母向右移动 k 位
+        var newString = "";
+        for (var i = 0; i < stringValue.length; i++) {
+          newString += nextCharacter(stringValue[i].charCodeAt(), k);
+        }
+        return newString;
+      }
+      var password = [];
+      password = caesarCipher(password2, -3);
 
       this.setData({
         passwordId: passwordId,
         accountDescp: account.accountDescp,
         passwordLenght: account.passwordLength,
         passwordCombination: account.passwordCombination,
-        passwordResult: account.passwordResult
+        passwordResult: password,
+        
       })
     }
     var passwordStrength = this.data.passwordStrength
@@ -69,7 +97,34 @@ Page({
   },
   passwordResultInput: function (e) {
     var passwordResult = e.detail.value
-    this.setData({ passwordResult: passwordResult })
+    var nextCharacter = function (asciiValue, k) {
+      var s = asciiValue;
+      // 获取给定字母的后面第 k 个字母
+      if ((s >= 65 && s <= 90) || (s >= 97 && s <= 122)) {
+        if ((s + k >= 65 && s + k <= 90) || (s + k >= 97 && s + k <= 122)) {
+          return String.fromCharCode(s + k);
+        } else {
+          return String.fromCharCode(s + k - 26);
+        }
+      }
+      // 非字母字符不变化
+      else {
+        return String.fromCharCode(s);
+      }
+    }
+
+    var caesarCipher = function (stringValue, k) { // k 表示每个字母向右移动 k 位
+      var newString = "";
+      for (var i = 0; i < stringValue.length; i++) {
+        newString += nextCharacter(stringValue[i].charCodeAt(), k);
+      }
+      return newString;
+    }
+    var password2 = [];
+    password2 = caesarCipher(passwordResult, 3);
+
+    this.setData({ passwordResult: passwordResult, passwordResult2: password2 })
+    //this.setData({ passwordResult: passwordResult })
 
   },
   copyToClipboard: function () {
@@ -111,8 +166,34 @@ Page({
     }
     var length = this.data.passwordLength
     var specials = this.data.passwordCombination
-    var password = randPassword(length, specials)
-    this.setData({ passwordResult: password })
+    var password = randPassword(length, specials)  //生成密码
+    var nextCharacter = function (asciiValue, k) {
+      var s = asciiValue;
+      // 获取给定字母的后面第 k 个字母
+      if ((s >= 65 && s <= 90) || (s >= 97 && s <= 122)) {
+        if ((s + k >= 65 && s + k <= 90) || (s + k >= 97 && s + k <= 122)) {
+          return String.fromCharCode(s + k);
+        } else {
+          return String.fromCharCode(s + k - 26);
+        }
+      }
+      // 非字母字符不变化
+      else {
+        return String.fromCharCode(s);
+      }
+    }
+
+    var caesarCipher = function (stringValue, k) { // k 表示每个字母向右移动 k 位
+      var newString = "";
+      for (var i = 0; i < stringValue.length; i++) {
+        newString += nextCharacter(stringValue[i].charCodeAt(), k);
+      }
+      return newString;
+    }
+    var password2=[];
+    password2 = caesarCipher(password,3);
+    
+    this.setData({ passwordResult: password, passwordResult2: password2 })
   },
   submit: function () {
 
@@ -124,6 +205,7 @@ Page({
     var passwordLength = this.data.passwordLength
     var passwordCombination = this.data.passwordCombination
     var passwordResult = this.data.passwordResult
+    var passwordResult2 = this.data.passwordResult2
     if (passwordResult == "") {
       return wx.showToast({ title: "密码不能为空", icon: "warn" })
     }
@@ -144,17 +226,18 @@ Page({
 
     wx.showModal({
       title: "提交",
-      content: "请确定此账号密码已在对应网站，APP上成功设置",
+      content: "请确定此账号密码：" + passwordResult,
       success: function (res) {
         if (res.confirm) {
-          wx.setStorage({
+          wx.setStorage({  //直接存储了，明文存储了。
             key: passwordId,
             data: {
               passwordId: passwordId,
               accountDescp: accountDescp,
               passwordLength: passwordLength,
               passwordCombination: passwordCombination,
-              passwordResult: passwordResult
+              //passwordResult: passwordResult //存储明文
+              passwordResult: passwordResult2 //存储密文
             },
           })
           wx.redirectTo({

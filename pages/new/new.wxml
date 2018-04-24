@@ -33,6 +33,6 @@
       </view>
     </view>
     <button class="weui-btn" type="primary" bindtap="generatePassword">生成密码</button>
-    <button class="weui-btn" type="primary" bindtap="submit">提    交</button>
+    <button class="weui-btn" type="primary" bindtap="submit">提交或返回</button>
   </view>
 </view>

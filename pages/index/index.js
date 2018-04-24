@@ -37,7 +37,8 @@ Page({
     wx.setClipboardData({
       data: password,
       success: function (res) {
-        wx.showToast({ title: "密码已成功复制到剪切板", icon: "success" })
+        wx.showToast({
+          title: "密码: " +password+"已成功复制到剪切板", icon: "success" })
       }
     })
 
@@ -60,7 +61,7 @@ Page({
   },
   newAccount: function (e) {
     wx.redirectTo({
-      url: '/pages/new/new',
+      url: '/pages/new/new', //重定向
       success: function (res) {
         // success
       },
@@ -100,11 +101,44 @@ Page({
     var accounts = []
     for (var i = 0; i < res.keys.length; i++) {
       var id = res.keys[i];
+      //console.log("id "+id); 
+      var nextCharacter = function (asciiValue, k) {
+        var s = asciiValue;
+        // 获取给定字母的后面第 k 个字母
+        if ((s >= 65 && s <= 90) || (s >= 97 && s <= 122)) {
+          if ((s + k >= 65 && s + k <= 90) || (s + k >= 97 && s + k <= 122)) {
+            return String.fromCharCode(s + k);
+          } else {
+            return String.fromCharCode(s + k - 26);
+          }
+        }
+        // 非字母字符不变化
+        else {
+          return String.fromCharCode(s);
+        }
+      }
+
+      var caesarCipher = function (stringValue, k) { // k 表示每个字母向右移动 k 位
+        var newString = "";
+        for (var i = 0; i < stringValue.length; i++) {
+          newString += nextCharacter(stringValue[i].charCodeAt(), k);
+        }
+        return newString;
+      }
+      //console.log(`Old String: "KhoorZrug! ^-^", Encrypted String: "${caesarCipher("KhoorZrug! ^-^", -3)}"`);//凯撒加密
+
       if (id == "logs")
-        continue
-      var account = wx.getStorageSync(id)
-      accounts.push({ id: id, descp: account.accountDescp, password: account.passwordResult, open: false })
+        continue 
+      var account = wx.getStorageSync(id) //从本地缓存中同步获取指定 key 对应的内容 
+      //console.log("account " + account.passwordResult);
+      
+      var password2 = account.passwordResult;
+      var password=[];
+      password = caesarCipher(password2,-3);
+      console.log("account " + password+" "+password2);
+      
+      accounts.push({ id: id, descp: account.accountDescp, password: password, open: false })  //解密显示
     }
-    this.setData({ accounts: accounts })
+    this.setData({ accounts: accounts }) //setData 函数用于将数据从逻辑层发送到视图层，同时改变对应的 this.data 的值。
   }
 })
