@@ -53,6 +53,7 @@ Page({
         passwordLenght: account.passwordLength,
         passwordCombination: account.passwordCombination,
         passwordResult: password,
+        passwordResult2: password2
         
       })
     }

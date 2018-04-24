@@ -38,7 +38,7 @@ Page({
       data: password,
       success: function (res) {
         wx.showToast({
-          title: "密码: " +password+"已成功复制到剪切板", icon: "success" })
+          title: password, icon: "success" })
       }
     })
 
